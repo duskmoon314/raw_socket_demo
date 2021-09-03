@@ -3,7 +3,7 @@
 u_char tos(u_int ddl, u_int prio) {
   u_int tmp = ddl + prio;
   if (tmp < 0x00000010) {
-    return 0 << 5;
+    return 0;
   } else if (tmp < 0x00000100) {
     return 1 << 5;
   } else if (tmp < 0x00001000) {
