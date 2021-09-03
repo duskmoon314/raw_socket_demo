@@ -18,6 +18,19 @@ Tested on Mac OS
 
 在 sys/socket.h 中提供 setsockopt 方法，可以修改当前 socket 发出包时包头中的字段。可配置字段在 netinet/in.h 中有列出，不同协议可以配置的部分不一样，所以需要参考协议标准和源码进行选择。
 
+```c
+// netinet/in.h
+/*
+ * Options for use with [gs]etsockopt at the IP level.
+ * First word of comment is data type; bool is stored in int.
+ */
+#define IP_OPTIONS              1    /* buf/ip_opts; set/get IP options */
+#define IP_HDRINCL              2    /* int; header is included with data */
+#define IP_TOS                  3    /* int; IP type of service and preced. */
+#define IP_TTL                  4    /* int; IP time to live */
+...
+```
+
 对于 IPv4 + UDP 的使用情况，仅需要配置 TOS 字段，其余部分和基础的使用 UDP 一致。只需加上如下几行配置 TOS 即可：
 
 ```c
