@@ -62,6 +62,7 @@ int main() {
     printf("Server message sent.\n");
   }
 
+  // 关闭 socket 退出
   close(socket_fd);
 
   return 0;
