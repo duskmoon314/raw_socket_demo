@@ -1,24 +1,53 @@
 #include "utils.h"
 
 u_char tos(u_int ddl, u_int prio) {
-  u_int tmp = ddl + prio;
-  if (tmp < 0x00000010) {
-    return 0;
-  } else if (tmp < 0x00000100) {
-    return 1 << 5;
-  } else if (tmp < 0x00001000) {
-    return 2 << 5;
-  } else if (tmp < 0x00010000) {
-    return 3 << 5;
-  } else if (tmp < 0x00100000) {
-    return 4 << 5;
-  } else if (tmp < 0x01000000) {
-    return 5 << 5;
-  } else if (tmp < 0x10000000) {
-    return 6 << 5;
+  // TODO 怎么设计?
+
+  // ddl 在 0x9A7EC800切顶 1月
+  // 0x5265C00 1天
+  // 0x36EE80 1h
+  // 0xEA60 1min
+  // 0x3E8 1s
+  // 0x1F4 500ms
+  // 0xC8 200ms
+
+  u_char d, p;
+  if (ddl > 0x9A7EC800) {
+    d = 0;
+  } else if (ddl > 0x5265C00) {
+    d = 1;
+  } else if (ddl > 0x36EE80) {
+    d = 2;
+  } else if (ddl > 0xEA60) {
+    d = 3;
+  } else if (ddl > 0x3E8) {
+    d = 4;
+  } else if (ddl > 0x1F4) {
+    d = 5;
+  } else if (ddl > 0xC8) {
+    d = 6;
   } else {
-    return 7 << 5;
+    d = 7;
   }
+
+  if (prio > 1000000) {
+    p = 0;
+  } else if (prio > 100000) {
+    p = 1;
+  } else if (prio > 10000) {
+    p = 2;
+  } else if (prio > 1000) {
+    p = 3;
+  } else if (prio > 100) {
+    p = 4;
+  } else if (prio > 10) {
+    p = 5;
+  } else if (prio > 1) {
+    p = 6;
+  } else {
+    p = 7;
+  }
+  return max(d, p);
 }
 
 // 计算校验和

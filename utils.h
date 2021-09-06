@@ -29,6 +29,20 @@ sys/types.h:    类型
 unistd.h:       系统接口 close
 */
 
+#define max(a, b)                                                              \
+  ({                                                                           \
+    __typeof__(a) _a = (a);                                                    \
+    __typeof__(b) _b = (b);                                                    \
+    _a > _b ? _a : _b;                                                         \
+  })
+
+#define min(a, b)                                                              \
+  ({                                                                           \
+    __typeof__(a) _a = (a);                                                    \
+    __typeof__(b) _b = (b);                                                    \
+    _a < _b ? _a : _b;                                                         \
+  })
+
 // UDP 校验用伪 header
 struct UdpPseudoHdr {
   // 32 bits
