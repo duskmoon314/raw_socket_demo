@@ -20,6 +20,12 @@ run_dtp: dtp
 	tmux split-window "dist/dtp_client" && \
 	tmux -2 attach-session -d
 
+gen: gen_trace.py
+	python3 gen_trace.py
+
+test: dtp
+	dist/dtp_server > logs/server.log & dist/dtp_client > logs/client.log
+
 clean:
 	rm dsit/*
 

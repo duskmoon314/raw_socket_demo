@@ -1,4 +1,6 @@
 // Client side implementation of UDP client-server model
+#include "dtp_config.h"
+#include "utils.h"
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <stdio.h>
@@ -13,6 +15,10 @@
 
 // Driver code
 int main() {
+  dtp_config *traces;
+  int trace_num;
+  traces = parse_dtp_config("trace.txt", &trace_num);
+
   int sockfd;
   char buffer[MAXLINE] = {0};
   char msg[MAXLINE] = {0};
@@ -31,7 +37,9 @@ int main() {
   servaddr.sin_port = htons(PORT);
   servaddr.sin_addr.s_addr = INADDR_ANY;
 
-  for (int i = 0; i < 9; ++i) {
+  int correct = 0;
+
+  for (int i = 0; i < 100; ++i) {
     u_int n = 0, len;
 
     sprintf(msg, "%d, %d", 1 << (i * 4), 1 << (i * 4));
@@ -46,9 +54,13 @@ int main() {
     printf("Server : %d %s\n", n, buffer);
     int ddl, prio, blk, t;
     sscanf(buffer, "Server Msg%d %d %d %d###", &ddl, &prio, &blk, &t);
+    if (ddl == traces[i].deadline && prio == traces[i].priority &&
+        blk == traces[i].block_size && t == tos(ddl, prio)) {
+      correct += 1;
+      printf("correct\n");
+    }
     blk -= 1350;
-    printf("ddl %d prio %d blk - 1350: %d t %d\n", ddl, prio, blk, t);
-    int cnt = 0;
+    int cnt = 1;
     while (blk > 0) {
       recvfrom(sockfd, (char *)buffer, MAXLINE, 0, (struct sockaddr *)&servaddr,
                &len);
@@ -60,6 +72,7 @@ int main() {
     // sleep(10);
     // }
   }
+  printf("\n\nCorrect : %d\n", correct);
   close(sockfd);
   return 0;
 }

@@ -1,6 +1,7 @@
 #include "dtp_config.h"
 #include "utils.h"
 #include <netinet/in.h>
+#include <stdio.h>
 #include <string.h>
 #include <sys/socket.h>
 #include <unistd.h>
@@ -12,7 +13,7 @@ int main() {
 
   dtp_config *traces;
   int trace_num;
-  traces = parse_dtp_config("test_trace.txt", &trace_num);
+  traces = parse_dtp_config("trace.txt", &trace_num);
 
   // 存储收到的内容
   char buffer[128] = {0};
@@ -46,7 +47,7 @@ int main() {
   }
 
   uint client_addr_size = sizeof(client_addr);
-  for (int i = 0; i < 9; ++i) {
+  for (int i = 0; i < 100; ++i) {
     // 接收数据
     uint len = recvfrom(socket_fd, buffer, 128, 0,
                         (struct sockaddr *)&client_addr, &client_addr_size);
@@ -73,6 +74,8 @@ int main() {
       printf("Server message sent.\n");
     }
   }
+
+  printf("100 trace sent\n");
 
   // 关闭 socket 退出
   close(socket_fd);

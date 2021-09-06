@@ -5,10 +5,54 @@
 ## Usage
 
 ```
-make run
+mkdir dist
+mkdir logs
+make gen
+make test
 ```
 
-发出 8 个具有不同 TOS 段的 UDP 包，可使用 wireshark 进行捕获
+`make gen` 会调用 `gen_trace.py` 在根目录下生成 `trace.txt`，其中有 100 条格式如下的 DTP traces：
+
+```
+<send_time_gap ([0, 1] 间浮点数，demo中未使用)>    <deadline (ms 整型，小于 0x5265C00 一天)>    <block_size (Byte 整型，小于 0xFFFF)>    <priority (整型，小于 10000)>
+```
+
+> 使用 [simonkorl/dtp_utils](https://github.com/simonkorl/dtp_utils) 的 C 代码对 trace 进行读取。
+
+`make test` 会编译 `dtp_server.c` 和 `dtp_client.c` 并运行。两个的输出结果重定向到 `logs/server.log` 和 `logs/client.log`。
+
+`dtp_server` 读取 trace 并在 client 发送来一条数据触发后根据 trace 发若干个长度不超过 1350 的 UDP 包，其中 TOS 字段根据 trace 进行设置。`dtp_server` 对每条 trace 的处理与发送过程中会输出类似如下的内容：
+
+```
+================
+Client msg: 256, 2566, 268435456
+trace 32151680 481 9440 4
+Server message sent.
+Server message sent.
+Server message sent.
+Server message sent.
+Server message sent.
+Server message sent.
+Server message sent.
+```
+
+内容包含：与前一条 trace 的分割线、来自 client 的触发用信息、本条 trace 的各项（ddl prio blk_size）和计算得到的优先级、每次发包后输出的通知信息。
+
+`dtp_client` 同样读取 trace，并发送一个包用于触发 `dtp_server` 的一轮数据发送。在每轮接收到第一个包后，将包中内容取出，和读取的 trace 进行比对，同时计算要收并扔弃的剩下包的数量。其输出内容如下：
+
+```
+================
+Client message sent.
+Server : 1350 Server Msg32151680 481 9440 4###
+correct
+dump1 dump2 dump3 dump4 dump5 dump6
+```
+
+内容包含：与前一条 trace 的分割线、发送触发用包后的通知信息、来自 server 的第一个包内容、与 trace 比对是否正确、收并扔弃剩下包的通知信息。
+
+在 `dtp_client` 最后会输出 100 条 trace 的比对数据（本机测试应该不太可能会有错）
+
+> 现在使用 UDP 进行收发包，似乎 libc 不存在接口直接获取收到的 IPv4 包中 TOS 字段，所以将内容放在 data 段进行收发。这或许非常不合理，不能取到真正正确的，尽是权宜之计。更准确的方法是使用 wireshark，不过我尚不太会用。
 
 ## Note
 
@@ -62,6 +106,8 @@ User Datagram Protocol, Src Port: 9000, Dst Port: 57950 56
 ```
 
 从 9000 端口发出的是 server 发的包，最后显示的数字对应 TOS 段的高 6bit
+
+###
 
 ## REF
 
