@@ -6,6 +6,10 @@ dtp: dtp_server.c dtp_client.c
 	gcc dtp_server.c utils.c dtp_config.c -o dist/dtp_server
 	gcc dtp_client.c utils.c dtp_config.c -o dist/dtp_client
 
+dtp6: dtp_server6.c dtp_client6.c
+	gcc dtp_server6.c utils.c dtp_config.c -o dist/dtp_server6
+	gcc dtp_client6.c utils.c dtp_config.c -o dist/dtp_client6
+
 run_opt: opt
 	tmux new-session -d "tshark -i loopback -T fields -e udp -e ip.dsfield.dscp 'udp port 9000'" && \
 	tmux set-option remain-on-exit on && \
